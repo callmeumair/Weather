@@ -10,12 +10,26 @@ export default function Home() {
   const apiKey = 'cda3ca82864e45baa8c152157252204';
 
   const getWeather = async () => {
-    if (!city) return;
+    if (!city.trim()) {
+      alert('Please enter a city name.');
+      return;
+    }
+
     try {
       const res = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
+          city
+        )}&units=metric&appid=${apiKey}`
       );
-      if (!res.ok) throw new Error('City not found');
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error('City not found. Please check the spelling.');
+        } else {
+          throw new Error('Failed to fetch weather data. Please try again later.');
+        }
+      }
+
       const data = await res.json();
       setWeather(data);
     } catch (err) {
